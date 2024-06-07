@@ -1,36 +1,42 @@
 package dev.gorito.service;
 
 import dev.gorito.model.Product;
-import lombok.Getter;
+import dev.gorito.repository.ProductRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ProductService {
-    @Getter
-    private List<Product> products = new ArrayList<>();
+    private final ProductRepository productRepository;
+
+    public List<Product> listProducts(String title) {
+        if (title != null) {
+            productRepository.findByTitle(title);
+        }
+        return productRepository.findAll();
+    }
 
     public void saveProduct(Product product) {
-        product.setId(product.getId());
-        products.add(product);
+        log.info("Saving new {}", product);
+        productRepository.save(product);
     }
 
     public void deleteProduct(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("ID не может быть без значения");
         }
-        products.removeIf(product -> product.getId().equals(id));
+        productRepository.deleteById(id);
     }
 
     public Product getProductById(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Товар не найден");
+            throw new IllegalArgumentException();
         }
-        for (Product product : products) {
-            if (product.getId().equals(id)) return product;
-        }
-        return null;
+        return productRepository.findById(id).orElse(null);
     }
 }
